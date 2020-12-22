@@ -339,6 +339,31 @@ def get_size(img):
         return img.size
 
 
+def process_box(margin, out_size, box, raw_img_size) -> list:
+    """[summary]
+
+    Args:
+        margin ([type]): [description]
+        out_size ([type]): [description]
+        box ([type]): [description]
+        raw_img_size ([type]): [description]
+
+    Returns:
+        Nx4: List of boxes where N is number of detection.
+            Each box is [x1, y1, x2, y2]
+    """
+    margin = [
+        margin * (box[2] - box[0]) / (out_size - margin),
+        margin * (box[3] - box[1]) / (out_size - margin),
+    ]
+    box = [
+        int(max(box[0] - margin[0] / 2, 0)),
+        int(max(box[1] - margin[1] / 2, 0)),
+        int(min(box[2] + margin[0] / 2, raw_img_size[0])),
+        int(min(box[3] + margin[1] / 2, raw_img_size[1])),
+    ]
+    return box
+
 def extract_face(img, box, image_size=160, margin=0, save_path=None):
     """Extract face + margin from PIL Image given bounding box.
     
@@ -355,17 +380,9 @@ def extract_face(img, box, image_size=160, margin=0, save_path=None):
     Returns:
         torch.tensor -- tensor representing the extracted face.
     """
-    margin = [
-        margin * (box[2] - box[0]) / (image_size - margin),
-        margin * (box[3] - box[1]) / (image_size - margin),
-    ]
     raw_image_size = get_size(img)
-    box = [
-        int(max(box[0] - margin[0] / 2, 0)),
-        int(max(box[1] - margin[1] / 2, 0)),
-        int(min(box[2] + margin[0] / 2, raw_image_size[0])),
-        int(min(box[3] + margin[1] / 2, raw_image_size[1])),
-    ]
+
+    box = process_box(margin, out_size=image_size, box=box, raw_img_size=raw_image_size)
 
     face = crop_resize(img, box, image_size)
 
