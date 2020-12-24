@@ -339,7 +339,7 @@ def get_size(img):
         return img.size
 
 
-def process_box(margin, out_size, box, raw_img_size) -> list:
+def process_box(out_size, box, raw_img_size, margin=0) -> list:
     """[summary]
 
     Args:
@@ -382,7 +382,7 @@ def extract_face(img, box, image_size=160, margin=0, save_path=None):
     """
     raw_image_size = get_size(img)
 
-    box = process_box(margin, out_size=image_size, box=box, raw_img_size=raw_image_size)
+    box = process_box(out_size=image_size, box=box, raw_img_size=raw_image_size, margin=margin)
 
     face = crop_resize(img, box, image_size)
 

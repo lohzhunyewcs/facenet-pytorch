@@ -3,7 +3,9 @@ from torch import nn
 import numpy as np
 import os
 
-from .utils.detect_face import detect_face, extract_face
+from .utils.detect_face import detect_face, extract_face, process_box
+
+from PIL import Image
 
 
 class PNet(nn.Module):
@@ -197,7 +199,8 @@ class MTCNN(nn.Module):
     def __init__(
         self, image_size=160, margin=0, min_face_size=20,
         thresholds=[0.6, 0.7, 0.7], factor=0.709, post_process=True,
-        select_largest=True, selection_method=None, keep_all=False, device=None
+        select_largest=True, selection_method=None, keep_all=False, device=None,
+        solver=False
     ):
         super().__init__()
 
@@ -222,6 +225,8 @@ class MTCNN(nn.Module):
 
         if not self.selection_method:
             self.selection_method = 'largest' if self.select_largest else 'probability'
+
+        self.sovler = solver
 
     def forward(self, img, save_path=None, return_prob=False, return_box=False):
         """Run MTCNN face detection on a PIL image or numpy array. This method performs both
@@ -263,6 +268,14 @@ class MTCNN(nn.Module):
             )
         # Extract faces
         faces = self.extract(img, batch_boxes, save_path)
+
+        if self.solver:
+            if type(img) is Image:
+                raw_img_size= img.size[:2]
+            else:
+                raw_img_size = img.shape[:2]
+            boxes = [process_box(self.image_size, box, raw_img_size=raw_img_size) for box in batch_boxes]
+            return None, list(zip(batch_probs, boxes))
 
         extra = []
         if return_prob:
