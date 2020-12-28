@@ -275,6 +275,8 @@ class MTCNN(nn.Module):
             else:
                 raw_img_size = img.shape[:2]
             boxes = [process_box(self.image_size, box, raw_img_size=raw_img_size) for box in batch_boxes]
+            if type(batch_probs) is not list:
+                batch_prods = [batch_probs]
             try:
                 return None, list(zip(batch_probs, boxes))
             except TypeError:
