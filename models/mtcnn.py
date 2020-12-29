@@ -274,13 +274,13 @@ class MTCNN(nn.Module):
                 raw_img_size= img.size[:2]
             else:
                 raw_img_size = img.shape[:2]
-            boxes = [process_box(self.image_size, box, raw_img_size=raw_img_size) for box in batch_boxes]
             if type(batch_probs) is not list:
                 batch_probs = [batch_probs]
             try:
+                boxes = [process_box(self.image_size, box, raw_img_size=raw_img_size) for box in batch_boxes]
                 return None, list(zip(batch_probs, boxes))
             except TypeError:
-                raise Exception(f"{batch_probs=}, {boxes = }, {type(batch_probs) = }")
+                raise Exception(f"{batch_probs=}, {batch_boxes = }, {type(batch_probs) = }")
 
         extra = []
         if return_prob:
